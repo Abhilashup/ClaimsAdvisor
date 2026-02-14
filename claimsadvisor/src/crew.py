@@ -1,19 +1,23 @@
 import os
+import logging
 from crewai import Agent, Task, Crew, Process
 from langchain_groq import ChatGroq
 from langchain_community.tools import DuckDuckGoSearchTool
 from llama_parse import LlamaParse
 from crewai.project import CrewBase, agent, crew, task
-import tempfile
-import json
 from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
+from src.models import ExtractedData, FinalAuditReport
+
+# Configure Logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 # Check for API Key
 if not os.getenv("GROQ_API_KEY"):
-    print("Warning: GROQ_API_KEY not found in environment variables.")
+    logger.warning("GROQ_API_KEY not found in environment variables.")
 
 llm = init_chat_model(
     model="llama-3.3-70b-versatile", 
@@ -25,7 +29,7 @@ llm = init_chat_model(
 class ClaimsAuditor:
     """
     Executes the Multi-Agent Workflow: 
-    OCR -> Extractor Agent -> Auditor Agent -> JSON Output
+    OCR -> Extractor Agent -> Auditor Agent -> Structured Output
     """
 
     agents_config = './config/agents.yaml'
@@ -38,7 +42,7 @@ class ClaimsAuditor:
             reasoning=True,
             inject_date=True,
             llm=llm,
-            allow_delegation=True
+            allow_delegation=False  # Reduced delegation for extraction to keep focus
         )
 
 
@@ -69,7 +73,8 @@ class ClaimsAuditor:
     def data_extraction(self) -> Task:
         return Task(
             config=self.tasks_config['data_extractor'],
-            agent=self.info_extractor()
+            agent=self.info_extractor(),
+            output_pydantic=ExtractedData # Force structured output
         )
     
     @task
@@ -84,7 +89,8 @@ class ClaimsAuditor:
     def claims_auditing(self) -> Task:
         return Task(
             config=self.tasks_config['claims_auditor'],
-            agent=self.claims_auditor()
+            agent=self.claims_auditor(),
+            output_pydantic=FinalAuditReport # Force structured output
         )
 
 
@@ -99,6 +105,7 @@ class ClaimsAuditor:
             planning=True,
             planning_llm=llm,
         )
+
     
 
 
