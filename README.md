@@ -1,1 +1,1 @@
-# AI-ClaimsAdvisor
+# ClaimsAdvisor
