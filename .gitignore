@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+uv.lock
+# If you want to keep uv.lock, you can remove it from here.
+# But usually .env and .venv are the critical ones.

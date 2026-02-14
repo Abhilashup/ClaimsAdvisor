@@ -1,0 +1,25 @@
+claims_auditor:
+  description: >
+    Review the extracted items.
+
+  expected_output: >
+    Assign 'Valid', 'Review Needed', or 'Rejected' based on Indian Tax Laws.
+    Return strictly a JSON list: [{"Description": "...", "Amount": 0, "Section": "...", "Category": "..."}]
+
+
+
+data_extractor:
+  description: >
+    Extract all monetary transactions from this text:\n\n{extracted_text}
+
+  expected_output: >
+    A detailed report that includes:
+    - A list of transactions with Description and Amount.
+
+
+task_researcher:
+  description: >
+    Find the FY 2025-26 limits for: Section 80C, 80D, and Standard Deduction.
+
+  expected_output: >
+    A summary of deduction limits (80C, 80D, HRA) for FY 2025-26.

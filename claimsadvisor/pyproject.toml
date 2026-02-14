@@ -1,0 +1,18 @@
+[project]
+name = "claimsadvisor"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "crewai>=1.9.3",
+    "duckduckgo-search>=8.1.1",
+    "fpdf>=1.7.2",
+    "langchain>=1.2.10",
+    "langchain-groq>=1.1.2",
+    "llama-parse>=0.6.94",
+    "pandas>=2.3.3",
+    "plotly>=6.5.2",
+    "python-dotenv>=1.1.1",
+    "streamlit>=1.54.0",
+]
