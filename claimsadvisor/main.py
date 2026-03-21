@@ -46,7 +46,7 @@ def run(file_path: str):
             logger.info(result)
 
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
+        logger.exception(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

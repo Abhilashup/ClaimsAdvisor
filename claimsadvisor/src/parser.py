@@ -55,7 +55,7 @@ def parse_document(file_path: str) -> str:
 
 if __name__ == "__main__":
     # Quick test if run directly
-    test_file = "path/to/your/test_invoice.pdf"
+    test_file = "claimsadvisor/dummy_claim.html"
     if os.path.exists(test_file):
         text = parse_document(test_file)
         print("--- Extracted Text Preview ---")

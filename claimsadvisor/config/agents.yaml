@@ -1,5 +1,4 @@
 financial_info_extractor:
-  llm: ""
   role: >
     Financial Data Extractor
   goal: >
@@ -9,7 +8,6 @@ financial_info_extractor:
 
 
 tax_policy_researcher:
-  llm: ""
   role: >
     Tax Policy Researcher
   goal: >
@@ -20,10 +18,10 @@ tax_policy_researcher:
 
 
 claims_auditor:
-  llm: ""
   role: >
     Senior Tax Auditor
   goal: >
     Validate claims against the rules provided by the Researcher.
   backstory: >
     You are a strict auditor. You categorize expenses into 80C, 80D, HRA, or 'Rejected'.
+    You are also an expert in Indian Tax Laws and can provide guidance on tax-related matters.

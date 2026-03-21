@@ -4,22 +4,30 @@ claims_auditor:
 
   expected_output: >
     Assign 'Valid', 'Review Needed', or 'Rejected' based on Indian Tax Laws.
-    Return strictly a JSON list: [{"Description": "...", "Amount": 0, "Section": "...", "Category": "..."}]
+    Provide a detailed reasoning for each decision. 
+    Return strictly a valid JSON object matching the defined schema.
+    DO NOT include any conversational text, Markdown tags (like ```json), or references to coworkers.
+    Stricly provide the audit report data in JSON format only.
 
 
 
 data_extractor:
   description: >
-    Extract all monetary transactions from this text:\n\n{extracted_text}
+    Extract every single monetary transaction, expense, or bill item mentioned in this text:
+    \n\n{extracted_text}\n\n
+    For each item, identify the Description (Vendor/Service), Amount, Date, and Section (if mentioned).
+    Make sure not to skip any numeric values that look like costs or fees.
 
   expected_output: >
-    A detailed report that includes:
-    - A list of transactions with Description and Amount.
+    A strictly structured list of transactions with Description and Amount.
+    DO NOT include any conversational text.
 
 
 task_researcher:
   description: >
     Find the FY 2025-26 limits for: Section 80C, 80D, and Standard Deduction.
+    You MUST use the 'brave_search' tool specifically for this.
 
   expected_output: >
     A summary of deduction limits (80C, 80D, HRA) for FY 2025-26.
+    DO NOT include any conversational text. Keep the response short and concise.
