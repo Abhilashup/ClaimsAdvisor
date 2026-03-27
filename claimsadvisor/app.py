@@ -110,8 +110,12 @@ with st.sidebar:
     st.markdown("<h2 style='text-align: center; margin-top: -20px;'>ClaimsAdvisor</h2>", unsafe_allow_html=True)
     st.markdown("---")
     
+    st.markdown("### 🏛️ Tax Settings")
+    tax_regime = st.sidebar.radio("Select Tax Regime", ["Old Tax Regime", "New Tax Regime"])
+    st.markdown("---")
+    
     st.markdown("### 📤 Upload Center")
-    uploaded_file = st.file_uploader("Drop your documents here", type=["pdf", "html", "png", "jpg", "jpeg", "docx"])
+    uploaded_files = st.file_uploader("Drop your documents here", type=["pdf", "html", "png", "jpg", "jpeg", "docx"], accept_multiple_files=True)
     
     st.markdown("---")
     st.markdown("### 🧪 Quick Test")
@@ -132,22 +136,21 @@ with st.sidebar:
         st.rerun()
 
 # --- Main Logic ---
-st.markdown("# AI-Driven Tax Claim Auditor")
-st.markdown("### `Precision` • `Speed` • `Privacy`")
+st.markdown("# AI-Driven Claims Advisor")
+st.markdown("### We give basic tax awareness to improve claim decisions, not full tax filing.")
+st.write("")
+st.warning("⚠️ **Note:** Claim eligibility often depends on your exact income details (e.g., HRA depends on basic salary, city of residence). This tool provides general guidance on whether an expense type is valid for a claim, rather than a final tax calculation.")
 st.write("")
 
 # Determine content to process
-content_to_process = None
-file_name = None
+has_content = False
 
-if uploaded_file:
-    content_to_process = uploaded_file.getvalue()
-    file_name = uploaded_file.name
+if uploaded_files:
+    has_content = True
 elif "sample_content" in st.session_state:
-    content_to_process = st.session_state.sample_content
-    file_name = st.session_state.sample_name
+    has_content = True
 
-if not content_to_process:
+if not has_content:
     st.markdown("""
     <div style="background: rgba(255,255,255,0.03); padding: 40px; border-radius: 20px; border: 1px dashed rgba(255,255,255,0.2); text-align: center;">
         <h2 style="color: #666 !important;">Start Your Audit</h2>
@@ -167,39 +170,62 @@ if not content_to_process:
 
 else:
     # Process the file
-    if "audit_report" not in st.session_state or ("last_file" in st.session_state and st.session_state.last_file != file_name):
+    current_identifier = ""
+    if uploaded_files:
+        current_identifier = ", ".join([f.name for f in uploaded_files]) + f" | {tax_regime}"
+    elif "sample_content" in st.session_state:
+        current_identifier = st.session_state.sample_name + f" | {tax_regime}"
+
+    if "audit_report" not in st.session_state or ("last_identifier" in st.session_state and st.session_state.last_identifier != current_identifier):
         with st.status("🚀 Processing Claims...", expanded=True) as status:
             try:
-                # 1. Save content to temp path
-                suffix = f".{file_name.split('.')[-1]}"
-                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
-                    tmp_file.write(content_to_process)
-                    tmp_path = tmp_file.name
-
-                st.session_state.last_file = file_name
-                
-                # 2. OCR Extraction
+                st.session_state.last_identifier = current_identifier
                 st.write("🔍 **Phase 1: OCR Extraction**...")
-                extracted_text = parse_document(tmp_path)
                 
-                if not extracted_text:
-                    st.error("Text extraction failed.")
+                combined_text = ""
+                
+                if uploaded_files:
+                    for uf in uploaded_files:
+                        suffix = f".{uf.name.split('.')[-1]}"
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
+                            tmp_file.write(uf.getvalue())
+                            tmp_path = tmp_file.name
+                        
+                        text = parse_document(tmp_path)
+                        if text:
+                            combined_text += f"\n--- Content from {uf.name} ---\n" + text
+                            
+                        if os.path.exists(tmp_path):
+                            os.unlink(tmp_path)
+                            
+                elif "sample_content" in st.session_state:
+                    suffix = f".{st.session_state.sample_name.split('.')[-1]}"
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
+                        tmp_file.write(st.session_state.sample_content)
+                        tmp_path = tmp_file.name
+                        
+                    combined_text = parse_document(tmp_path)
+                    
+                    if os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
+                
+                if not combined_text:
+                    st.error("Text extraction failed or no text found.")
                     st.stop()
                 
                 # 3. Kickoff Crew
                 st.write("🤖 **Phase 2: Multi-Agent Audit** (Researching & Validating)...")
-                inputs = {"extracted_text": extracted_text}
+                inputs = {
+                    "extracted_text": combined_text,
+                    "tax_regime": tax_regime
+                }
                 
                 auditor = ClaimsAuditor()
                 result = auditor.claimsresearchercrew().kickoff(inputs=inputs)
                 
                 # 4. Store result
                 st.session_state.audit_report = result
-                st.session_state.extracted_text = extracted_text
-                
-                # Cleanup
-                if os.path.exists(tmp_path):
-                    os.unlink(tmp_path)
+                st.session_state.extracted_text = combined_text
                 
                 status.update(label="✅ Audit Complete!", state="complete", expanded=False)
 

@@ -1,9 +1,9 @@
 claims_auditor:
   description: >
-    Review the extracted items.
+    Review the extracted items considering the user has selected the '{tax_regime}'.
 
   expected_output: >
-    Assign 'Valid', 'Review Needed', or 'Rejected' based on Indian Tax Laws.
+    Assign 'Valid', 'Review Needed', or 'Rejected' based on Indian Tax Laws for the selected tax regime.
     Provide a detailed reasoning for each decision. 
     Return strictly a valid JSON object matching the defined schema.
     DO NOT include any conversational text, Markdown tags (like ```json), or references to coworkers.
