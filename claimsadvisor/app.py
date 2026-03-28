@@ -108,27 +108,24 @@ st.markdown("""
 with st.sidebar:
     st.markdown("<h1 style='text-align: center;'>⚖️</h1>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align: center; margin-top: -20px;'>ClaimsAdvisor</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; font-size: 0.8em; color: #888;'>For Salaried Individuals</p>", unsafe_allow_html=True)
     st.markdown("---")
     
     st.markdown("### 🏛️ Tax Settings")
     tax_regime = st.sidebar.radio("Select Tax Regime", ["Old Tax Regime", "New Tax Regime"])
-    st.markdown("---")
     
+    st.markdown("---")
+    st.markdown("### 📊 Income Profile")
+    st.write("Enter your monthly income details for precise HRA/eligibility auditing.")
+    basic_salary = st.sidebar.number_input("Monthly Basic Salary (₹)", min_value=0, value=0, step=1000)
+    city_type = st.sidebar.selectbox("City Type", ["Metro (Mumbai, Delhi, Kolkata, Chennai)", "Non-Metro"])
+    is_renting = st.sidebar.checkbox("I live in a rented house", value=True)
+    
+    st.markdown("---")
     st.markdown("### 📤 Upload Center")
     uploaded_files = st.file_uploader("Drop your documents here", type=["pdf", "html", "png", "jpg", "jpeg", "docx"], accept_multiple_files=True)
     
-    st.markdown("---")
-    st.markdown("### 🧪 Quick Test")
-    if st.button("Use Sample Document"):
-        # Check if sample exists
-        sample_path = "claimsadvisor/dummy_claim.html"
-        if os.path.exists(sample_path):
-            with open(sample_path, "rb") as f:
-                st.session_state.sample_content = f.read()
-                st.session_state.sample_name = "dummy_claim.html"
-                st.info("Sample loaded. Click 'Process' to start.")
-        else:
-            st.error("Sample file not found.")
+
 
     st.markdown("---")
     if st.button("🔄 Clear & Restart"):
@@ -137,9 +134,13 @@ with st.sidebar:
 
 # --- Main Logic ---
 st.markdown("# AI-Driven Claims Advisor")
-st.markdown("### We give basic tax awareness to improve claim decisions, not full tax filing.")
+st.markdown("### `Salaried Employees Only` • `Privacy First` • `Awareness`")
+st.markdown("##### We give basic tax awareness to improve claim decisions, not full tax filing.")
 st.write("")
-st.warning("⚠️ **Note:** Claim eligibility often depends on your exact income details (e.g., HRA depends on basic salary, city of residence). This tool provides general guidance on whether an expense type is valid for a claim, rather than a final tax calculation.")
+
+st.info("🛡️ **Privacy Guard:** This tool is designed to mask or ignore Personal Identifiable Information (PII) like PAN, Aadhaar, and Names during processing.")
+
+st.warning("⚠️ **Note:** Claim eligibility depends on your exact income (e.g., HRA). This tool provides general guidance on whether an expense type is valid for a claim.")
 st.write("")
 
 # Determine content to process
@@ -217,7 +218,10 @@ else:
                 st.write("🤖 **Phase 2: Multi-Agent Audit** (Researching & Validating)...")
                 inputs = {
                     "extracted_text": combined_text,
-                    "tax_regime": tax_regime
+                    "tax_regime": tax_regime,
+                    "monthly_basic": basic_salary,
+                    "city_type": city_type,
+                    "is_renting": is_renting
                 }
                 
                 auditor = ClaimsAuditor()
