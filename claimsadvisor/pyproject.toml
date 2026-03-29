@@ -1,0 +1,22 @@
+[project]
+name = "claimsadvisor"
+version = "0.1.0"
+description = "AI-Driven Tax Claims Advisor for Salaried Individuals"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "crewai-tools>=1.9.3",
+    "crewai[tools]>=1.9.3",
+    "ddgs>=9.11.1",
+    "duckduckgo-search>=8.1.1",
+    "fpdf>=1.7.2",
+    "langchain>=1.2.10",
+    "langchain-community>=0.4.1",
+    "langchain-groq>=1.1.2",
+    "litellm>=1.75.3",
+    "llama-parse>=0.6.94",
+    "pandas>=2.3.3",
+    "plotly>=6.5.2",
+    "python-dotenv>=1.1.1",
+    "streamlit>=1.54.0",
+]

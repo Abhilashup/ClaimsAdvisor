@@ -1,0 +1,44 @@
+claims_auditor:
+  description: >
+    Review the extracted items considering:
+    1. Tax Regime: '{tax_regime}'
+    2. Monthly Basic Salary: ₹{monthly_basic}
+    3. City Type: '{city_type}' (Metro allows 50% basic, Non-Metro 40%)
+    4. Currently Renting: {is_renting}
+    \nNote: For 'New Tax Regime', most typical claims (HRA, 80C, 80D, etc.) are NOT allowed for salaried individuals.
+    For 'Old Tax Regime', calculate HRA exemption eligibility using the standard Indian formula (Lowest of: Actual HRA, 50%/40% of Basic, or Rent minus 10% of Basic).
+    Ensure you strictly follow the law for the specific regime and provided income details.
+
+  expected_output: >
+    Assign 'Valid', 'Review Needed', or 'Rejected' based on Indian Tax Laws for the selected tax regime and income profile.
+    If 'New Tax Regime' is selected and a claim is entered that is not allowed (like HRA or 80C), mark it as 'Rejected'.
+    If 'Old Tax Regime' is selected, provide the maximum eligible HRA amount based on the provided basic salary and city.
+    Provide a detailed reasoning for each decision. 
+    Return strictly a valid JSON object matching the defined schema.
+    DO NOT include any conversational text, Markdown tags (like ```json), or references to coworkers.
+    Stricly provide the audit report data in JSON format only.
+
+
+
+data_extractor:
+  description: >
+    Extract every single monetary transaction, expense, or bill item mentioned in this text:
+    \n\n{extracted_text}\n\n
+    For each item, identify the Description (Vendor/Service), Amount, Date, and Section (if mentioned).
+    \nCRITICAL: Do NOT extract any Personal Identifiable Information (PII) like names, PAN numbers, Aadhaar numbers, or Phone numbers. Mask them or skip them entirely.
+    Make sure not to skip any numeric values that look like costs or fees.
+
+  expected_output: >
+    A strictly structured list of transactions with Description and Amount.
+    DO NOT include any conversational text.
+
+
+task_researcher:
+  description: >
+    Find the FY 2025-26 limits for: Section 80C, 80D, and Standard Deduction specifically for the '{tax_regime}'.
+    Determine if HRA and other deductions are applicable under this regime.
+    You MUST use the 'brave_search' tool specifically for this.
+
+  expected_output: >
+    A summary of deduction limits (80C, 80D, HRA) for FY 2025-26 for the selected tax regime.
+    DO NOT include any conversational text. Keep the response short and concise.
