@@ -26,6 +26,11 @@ st.set_page_config(
 # --- Custom Styling ---
 st.markdown("""
 <style>
+    /* Global Font Scaling */
+    html {
+        font-size: 0.95rem;
+    }
+
     /* Gradient Background */
     .stApp {
         background: linear-gradient(135deg, #0e1117 0%, #1a1c23 100%);
@@ -42,10 +47,11 @@ st.markdown("""
     .stButton>button {
         width: 100%;
         border-radius: 12px;
-        height: 3.5em;
+        height: 3.2em;
         background: linear-gradient(90deg, #ff4b4b 0%, #ff7676 100%);
         color: white;
         font-weight: 700;
+        font-size: 0.9rem;
         border: none;
         transition: all 0.4s ease;
         text-transform: uppercase;
@@ -65,7 +71,7 @@ st.markdown("""
     }
     .metric-card {
         background: rgba(255, 255, 255, 0.05);
-        padding: 25px;
+        padding: 20px;
         border-radius: 20px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
@@ -77,29 +83,47 @@ st.markdown("""
         border-color: #ff4b4b;
         background: rgba(255, 255, 255, 0.08);
     }
+    .metric-card h3 {
+        font-size: 0.9rem !important;
+        margin-bottom: 5px;
+    }
+    .metric-card h2 {
+        font-size: 1.4rem !important;
+    }
     
     /* Audit Summary Box */
     .audit-summary {
-        font-size: 1.1em;
-        line-height: 1.7;
+        font-size: 0.95em;
+        line-height: 1.6;
         color: #d1d5db;
         background: rgba(38, 39, 48, 0.6);
-        padding: 25px;
+        padding: 20px;
         border-radius: 15px;
         border: 1px solid #464b5d;
         border-left: 6px solid #ff4b4b;
-        margin: 20px 0;
+        margin: 15px 0;
     }
     
-    /* Heading Colors */
-    h1, h2, h3 {
-        color: #ffffff !important;
-        font-weight: 800 !important;
-    }
+    /* Heading Colors & Scaling */
+    h1 { font-size: 1.8rem !important; color: #ffffff !important; font-weight: 800 !important; }
+    h2 { font-size: 1.4rem !important; color: #ffffff !important; font-weight: 700 !important; }
+    h3 { font-size: 1.1rem !important; color: #ffffff !important; font-weight: 700 !important; }
+    h4 { font-size: 1.0rem !important; color: #ffffff !important; font-weight: 600 !important; }
+    h5 { font-size: 0.9rem !important; color: #ffffff !important; font-weight: 600 !important; }
     
     .stDataFrame {
         border-radius: 12px;
         overflow: hidden;
+        font-size: 0.85rem;
+    }
+
+    /* Small Adjustments for Streamlit Defaults */
+    p, li {
+        font-size: 0.9rem;
+    }
+    
+    .stMarkdown div p {
+        font-size: 0.9rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -108,7 +132,7 @@ st.markdown("""
 with st.sidebar:
     st.markdown("<h1 style='text-align: center;'>⚖️</h1>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align: center; margin-top: -20px;'>ClaimsAdvisor</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; font-size: 0.8em; color: #888;'>For Salaried Individuals</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; font-size: 0.75em; color: #888;'>For Salaried Individuals</p>", unsafe_allow_html=True)
     st.markdown("---")
     
     st.markdown("### 🏛️ Tax Settings")
@@ -118,7 +142,7 @@ with st.sidebar:
     st.markdown("### 📊 Income Profile")
     st.write("Enter your monthly income details for precise HRA/eligibility auditing.")
     basic_salary = st.sidebar.number_input("Monthly Basic Salary (₹)", min_value=0, value=0, step=1000)
-    city_type = st.sidebar.selectbox("City Type", ["Metro (Mumbai, Delhi, Kolkata, Chennai)", "Non-Metro"])
+    city_type = st.sidebar.selectbox("City Type", ["Metro (Bengaluru, Mumbai, Delhi, Kolkata, Chennai)", "Non-Metro"])
     is_renting = st.sidebar.checkbox("I live in a rented house", value=True)
     
     st.markdown("---")
@@ -194,7 +218,7 @@ else:
                         
                         text = parse_document(tmp_path)
                         if text:
-                            combined_text += f"\n--- Content from {uf.name} ---\n" + text
+                            combined_text += f"\n\n---\n## 📄 Document: `{uf.name}`\n\n" + text
                             
                         if os.path.exists(tmp_path):
                             os.unlink(tmp_path)
@@ -303,10 +327,11 @@ else:
             st.subheader("Audit Result (Raw Agent Output)")
             st.markdown(report.raw)
 
-        # Tabs for details
         tab1, tab2 = st.tabs(["📄 OCR Extracted Text", "🤖 Multi-Agent Logs"])
         with tab1:
-            st.text_area("Markdown text extracted from document:", st.session_state.extracted_text, height=400)
+            st.markdown("### 📄 Extracted Document Structure")
+            st.info("The AI uses this structured markdown to audit your claims. Tables and layout are preserved for better reasoning.")
+            st.markdown(st.session_state.extracted_text)
         with tab2:
             st.info("Log visualization under development. Check terminal for real-time progress.")
 

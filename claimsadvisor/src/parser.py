@@ -31,7 +31,14 @@ def parse_document(file_path: str) -> str:
         result_type="markdown",
         verbose=False, # Set to False for cleaner production logs
         language="en",
-        num_workers=4
+        num_workers=4,
+        parsing_instruction="""
+        This is a tax claim, bill, or financial document. 
+        Please extract all text and tables with high precision.
+        Preserve the document structure into clean Markdown. 
+        Ensure tables are correctly formatted with markdown table syntax.
+        If there are multiple sections like 'HRA', 'Medical', or 'LTA', clearly demarcate them.
+        """
     )
 
     logger.info(f"Starting LlamaParse for: {file_path}")
