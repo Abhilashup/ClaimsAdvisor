@@ -12,7 +12,7 @@ SUPPORTED_EXTENSIONS = {'.pdf', '.jpg', '.jpeg', '.png', '.docx', '.html'}
 
 def parse_document(file_path: str) -> str:
     """
-    Parses a document into markdown text using LlamaParse with validation and logging.
+    Parses documents into markdown text using LlamaParse with validation and logging.
     """
     if not os.path.exists(file_path):
         logger.error(f"File not found: {file_path}")
