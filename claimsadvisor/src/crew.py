@@ -48,7 +48,7 @@ class ClaimsAuditor:
     def info_extractor(self) -> Agent:
         return Agent(
             config=self.agents_config['financial_info_extractor'],
-            verbose=True, # Added for UI visibility
+            verbose=True, 
             reasoning=True,
             inject_date=True,
             llm=llm,
@@ -61,15 +61,15 @@ class ClaimsAuditor:
     def claims_researcher(self) -> Agent:
         return Agent(
             config=self.agents_config['tax_policy_researcher'],
-            verbose=True, # Added for UI visibility
+            verbose=True, 
             tools=[
-                brave_search # Renamed to match model's expected tool name
+                brave_search
             ],
             inject_date=True,
             llm=llm,
-            allow_delegation=False, # Disable delegation to focus on search
-            max_iter=3, # Prevent loops if search gets stuck
-            max_rpm=10 # Rate limit for Groq
+            allow_delegation=False, 
+            max_iter=3, 
+            max_rpm=10 
         )
 
     
@@ -77,11 +77,11 @@ class ClaimsAuditor:
     def claims_auditor(self) -> Agent:
         return Agent(
             config=self.agents_config['claims_auditor'],
-            verbose=True, # Added for UI visibility
+            verbose=True, 
             inject_date=True,
             llm=llm,
-            allow_delegation=False, # Disable delegation to prevent tool confusion with the 70b model
-            max_rpm=10 # Rate limit for Groq
+            allow_delegation=False, 
+            max_rpm=10 
         )
 
 
@@ -121,7 +121,7 @@ class ClaimsAuditor:
             planning=False,
             memory=True, # Enable memory to reduce repeated tasks
             cache=True, # Enable caching
-            step_callback=lambda step: time.sleep(10) # Reduced from 15 as max_rpm handles most of it, but still safe
+            step_callback=lambda step: time.sleep(10) # Reduced from 15 as max_rpm handles most of it
         )
 
 
