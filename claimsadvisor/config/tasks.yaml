@@ -2,11 +2,14 @@ claims_auditor:
   description: >
     Review the extracted items considering:
     1. Tax Regime: '{tax_regime}'
-    2. Monthly Basic Salary: ₹{monthly_basic}
-    3. City Type: '{city_type}' (Metro allows 50% basic, Non-Metro 40%)
-    4. Currently Renting: {is_renting}
-    \nNote: For 'New Tax Regime', most typical claims (HRA, 80C, 80D, etc.) are NOT allowed for salaried individuals.
-    For 'Old Tax Regime', calculate HRA exemption eligibility using the standard Indian formula (Lowest of: Actual HRA, 50%/40% of Basic, or Rent minus 10% of Basic).
+    2. Monthly Basic Salary: ₹{monthly_basic} (Optional: treat as 0 if not provided)
+    3. Monthly HRA Received: ₹{monthly_hra} (Optional: treat as 0 if not provided)
+    4. City Type: '{city_type}' (Metro allows 50% basic, Non-Metro 40%)
+    5. Currently Renting: {is_renting}
+    \nNote: If 'Monthly Basic Salary' or 'Monthly HRA Received' is 0 or not provided, you CANNOT precisely calculate HRA exemption. 
+    In such cases, for 'Old Tax Regime', mark HRA claims as 'Review Needed' and mention that income details are required for precise auditing. 
+    For 'New Tax Regime', most typical claims (HRA, 80C, 80D, etc.) are NOT allowed for salaried individuals regardless of income.
+    For 'Old Tax Regime' WITH income details provided, calculate HRA exemption eligibility using the standard Indian formula (Lowest of: Actual HRA Received, Rent Paid minus 10% of Basic, or 50%/40% of Basic).
     Ensure you strictly follow the law for the specific regime and provided income details.
 
   expected_output: >

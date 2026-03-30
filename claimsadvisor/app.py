@@ -139,11 +139,16 @@ with st.sidebar:
     tax_regime = st.sidebar.radio("Select Tax Regime", ["Old Tax Regime", "New Tax Regime"])
     
     st.markdown("---")
-    st.markdown("### 📊 Income Profile")
-    st.write("Enter your monthly income details for precise HRA/eligibility auditing.")
-    basic_salary = st.sidebar.number_input("Monthly Basic Salary (₹)", min_value=0, value=0, step=1000)
-    city_type = st.sidebar.selectbox("City Type", ["Metro (Bengaluru, Mumbai, Delhi, Kolkata, Chennai)", "Non-Metro"])
-    is_renting = st.sidebar.checkbox("I live in a rented house", value=True)
+    st.markdown("### 📊 Income Profile (Optional)")
+    with st.expander("Provide Details for HRA Audit"):
+        st.write("Enter your monthly income details for precise HRA/eligibility auditing.")
+        basic_salary = st.number_input("Monthly Basic Salary (₹)", min_value=0, value=0, step=1000)
+        monthly_hra = st.number_input("Monthly HRA Received (₹)", min_value=0, value=0, step=1000)
+        city_type = st.selectbox("City Type", ["Metro (Bengaluru, Mumbai, Delhi, Kolkata, Chennai)", "Non-Metro"])
+        is_renting = st.checkbox("I live in a rented house", value=True)
+    
+    # Defaults if expander is not interacted with or values are 0
+    # (Streamlit keeps the variables in session state/scope)
     
     st.markdown("---")
     st.markdown("### 📤 Upload Center")
@@ -152,7 +157,7 @@ with st.sidebar:
 
 
     st.markdown("---")
-    if st.button("🔄 Clear & Restart"):
+    if st.button("🔄 Restart Process"):
         st.session_state.clear()
         st.rerun()
 
@@ -244,6 +249,7 @@ else:
                     "extracted_text": combined_text,
                     "tax_regime": tax_regime,
                     "monthly_basic": basic_salary,
+                    "monthly_hra": monthly_hra,
                     "city_type": city_type,
                     "is_renting": is_renting
                 }
