@@ -1,4 +1,5 @@
 import streamlit as st
+import re
 import os
 import tempfile
 import pandas as pd
@@ -14,6 +15,86 @@ from src.crew import ClaimsAuditor
 from src.models import FinalAuditReport, ExtractedData
 import logging
 import time
+
+
+def mask_pii(text: str) -> str:
+    """
+    Masks common PII patterns in text:
+    - PAN numbers (e.g., ABCDE1234F -> AB***234F)
+    - Aadhaar numbers (e.g., 1234 5678 9012 -> XXXX XXXX 9012)
+    - Phone numbers (10-digit Indian mobile)
+    - Email addresses
+    - Bank account numbers (long digit sequences)
+    """
+    # PAN number: 5 letters, 4 digits, 1 letter
+    text = re.sub(
+        r'\b([A-Z]{2})[A-Z]{3}(\d{3})(\d)([A-Z])\b',
+        r'\1***\2*\4',
+        text
+    )
+
+    # Aadhaar: 4 4 4 digit groups
+    text = re.sub(
+        r'\b\d{4}[\s-]\d{4}[\s-](\d{4})\b',
+        r'XXXX XXXX \1',
+        text
+    )
+    # Aadhaar: 12 consecutive digits
+    text = re.sub(
+        r'\b\d{8}(\d{4})\b',
+        r'XXXXXXXX\1',
+        text
+    )
+
+    # Indian mobile: +91 or 0 prefix optional, then 10 digits
+    text = re.sub(
+        r'(\+91[\s-]?|0)?([6-9]\d)(\d{4})(\d{4})\b',
+        r'\1\2****\4',
+        text
+    )
+
+    # Email addresses
+    text = re.sub(
+        r'([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*(@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
+        r'\1****\2',
+        text
+    )
+
+    # Bank account numbers (sequences of 9-18 digits)
+    text = re.sub(
+        r'\b(\d{4})\d{5,10}(\d{4})\b',
+        r'\1*****\2',
+        text
+    )
+
+    # Names following common prefixes (case-insensitive)
+    # Matches "Name: John Doe", "Employee Name - Jane", "Mr. Smith", etc.
+    prefixes = r'(?:Name:|Employee Name|Patient Name|Mr\.|Mrs\.|Ms\.|Shri|Smt\.|Landlord Name|Doctor Name|Payee)'
+    def replace_name(m):
+        prefix = m.group(1)
+        sep = m.group(2)
+        name = m.group(3).strip()
+        if not name:
+            return m.group(0)
+        
+        parts = name.split()
+        if len(parts) > 1:
+            masked = f"{parts[0][0]}*** {parts[-1]}"
+        else:
+            masked = f"{name[0]}***"
+        
+        return f"{prefix}{sep}{masked}"
+
+    # Refined regex to stop at common delimiters like comma or double space or newline
+    text = re.sub(
+        rf'\b({prefixes})(\s*[:\-\s]\s*)([a-zA-Z\.\-\s]{{2,}}?)(?=\n|\r|  |,|\t|$)',
+        replace_name,
+        text,
+        flags=re.IGNORECASE
+    )
+
+    return text
+
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -140,6 +221,13 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("### 📊 Income Profile (Optional)")
+    
+    # Initialize defaults
+    basic_salary = 0
+    monthly_hra = 0
+    city_type = "Non-Metro"
+    is_renting = False
+
     with st.expander("Provide Details for HRA Audit"):
         st.write("Enter your monthly income details for precise HRA/eligibility auditing.")
         basic_salary = st.number_input("Monthly Basic Salary (₹)", min_value=0, value=0, step=1000)
@@ -245,11 +333,18 @@ else:
                 
                 # 3. Kickoff Crew
                 st.write("🤖 **Phase 2: Multi-Agent Audit** (Researching & Validating)...")
+                
+                # Check for basic financial keywords as a simple guardrail before processing
+                financial_keywords = ["bill", "invoice", "claim", "tax", "gst", "amount", "rupees", "payment", "received", "dated", "vendor"]
+                if not any(kw in combined_text.lower() for kw in financial_keywords):
+                    st.error("⚠️ The uploaded document doesn't seem to be a financial claim or bill. Please upload valid documents.")
+                    st.stop()
+
                 inputs = {
                     "extracted_text": combined_text,
                     "tax_regime": tax_regime,
-                    "monthly_basic": basic_salary,
-                    "monthly_hra": monthly_hra,
+                    "monthly_basic": basic_salary if basic_salary > 0 else "Not Provided",
+                    "monthly_hra": monthly_hra if monthly_hra > 0 else "Not Provided",
                     "city_type": city_type,
                     "is_renting": is_renting
                 }
@@ -304,17 +399,20 @@ else:
 
             with mid_right:
                 st.subheader("Executive Summary")
-                st.markdown(f'<div class="audit-summary">{data.summary}</div>', unsafe_allow_html=True)
+                # Mask PII in summary
+                masked_summary = mask_pii(data.summary)
+                st.markdown(f'<div class="audit-summary">{masked_summary}</div>', unsafe_allow_html=True)
 
             # --- Audited Claims Table ---
             st.subheader("📋 Detailed Audit Breakdown")
+            # Mask PII in descriptions and reasoning
             claims_df = pd.DataFrame([
                 {
-                    "Description": c.description,
+                    "Description": mask_pii(c.description),
                     "Amount": f"₹ {c.amount:,.2f}",
                     "Section": c.section,
                     "Status": c.category,
-                    "Reasoning": c.reasoning
+                    "Reasoning": mask_pii(c.reasoning)
                 } for c in data.audited_claims
             ])
             
@@ -336,8 +434,9 @@ else:
         tab1, tab2 = st.tabs(["📄 OCR Extracted Text", "🤖 Multi-Agent Logs"])
         with tab1:
             st.markdown("### 📄 Extracted Document Structure")
-            st.info("The AI uses this structured markdown to audit your claims. Tables and layout are preserved for better reasoning.")
-            st.markdown(st.session_state.extracted_text)
+            st.info("🛡️ **PII Masked:** Personal identifiers (PAN, Aadhaar, Phone, Email, Bank A/C) are automatically redacted below for your privacy.")
+            masked_text = mask_pii(st.session_state.extracted_text)
+            st.markdown(masked_text)
         with tab2:
             st.info("Log visualization under development. Check terminal for real-time progress.")
 
