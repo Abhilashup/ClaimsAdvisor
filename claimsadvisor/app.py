@@ -370,16 +370,26 @@ else:
         if hasattr(report, 'pydantic') and report.pydantic:
             data = report.pydantic
             
+            # --- Filter Claims ---
+            # Filter out and exclude claims where section is "None" or category is "Review Needed"
+            filtered_claims = [
+                c for c in data.audited_claims 
+                if c.section and str(c.section).lower() not in ["none", "n/a", "not provided"] 
+                and c.category in ["Valid", "Rejected"]
+            ]
+            
             # --- Metrics ---
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
+            
+            # Recalculate total valid amount based on filtered claims
+            current_total_valid = sum([c.amount for c in filtered_claims if c.category == 'Valid'])
+            valid_count = len([c for c in filtered_claims if c.category == 'Valid'])
+            rejected_count = len([c for c in filtered_claims if c.category == 'Rejected'])
+
             with col1:
-                st.markdown(f'<div class="metric-card"><h3>Total Valid</h3><h2 style="color:#00ff88;">₹ {data.total_valid_amount:,.2f}</h2></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card"><h3>Total Valid</h3><h2 style="color:#00ff88;">₹ {current_total_valid:,.2f}</h2></div>', unsafe_allow_html=True)
             with col2:
-                valid_count = len([c for c in data.audited_claims if c.category == 'Valid'])
                 st.markdown(f'<div class="metric-card"><h3>Valid Claims</h3><h2>{valid_count}</h2></div>', unsafe_allow_html=True)
-            with col3:
-                review_count = len([c for c in data.audited_claims if c.category == 'Review Needed'])
-                st.markdown(f'<div class="metric-card"><h3>Needs Review</h3><h2 style="color:#ffcc00;">{review_count}</h2></div>', unsafe_allow_html=True)
 
             # --- Chart and Summary ---
             st.write("")
@@ -387,15 +397,18 @@ else:
             
             with mid_left:
                 st.subheader("Audit Distribution")
-                # Prepare data for pie chart
-                counts = pd.Series([c.category for c in data.audited_claims]).value_counts().reset_index()
-                counts.columns = ['Category', 'Count']
-                fig = px.pie(counts, values='Count', names='Category', 
-                             color='Category',
-                             color_discrete_map={'Valid': '#00ff88', 'Rejected': '#ff4b4b', 'Review Needed': '#ffcc00'},
-                             hole=0.6)
-                fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', showlegend=False, margin=dict(t=0, b=0, l=0, r=0))
-                st.plotly_chart(fig, use_container_width=True)
+                # Prepare data for pie chart based on filtered claims
+                if filtered_claims:
+                    counts = pd.Series([c.category for c in filtered_claims]).value_counts().reset_index()
+                    counts.columns = ['Category', 'Count']
+                    fig = px.pie(counts, values='Count', names='Category', 
+                                 color='Category',
+                                 color_discrete_map={'Valid': '#00ff88', 'Rejected': '#ff4b4b'},
+                                 hole=0.6)
+                    fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', showlegend=False, margin=dict(t=0, b=0, l=0, r=0))
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("No valid or rejected claims found with a specified section.")
 
             with mid_right:
                 st.subheader("Executive Summary")
@@ -405,7 +418,7 @@ else:
 
             # --- Audited Claims Table ---
             st.subheader("📋 Detailed Audit Breakdown")
-            # Mask PII in descriptions and reasoning
+            # Filtered list, removing Date and Vendor
             claims_df = pd.DataFrame([
                 {
                     "Description": mask_pii(c.description),
@@ -413,7 +426,7 @@ else:
                     "Section": c.section,
                     "Status": c.category,
                     "Reasoning": mask_pii(c.reasoning)
-                } for c in data.audited_claims
+                } for c in filtered_claims
             ])
             
             st.dataframe(claims_df, use_container_width=True, hide_index=True)
@@ -431,12 +444,6 @@ else:
             st.subheader("Audit Result (Raw Agent Output)")
             st.markdown(report.raw)
 
-        tab1, tab2 = st.tabs(["📄 OCR Extracted Text", "🤖 Multi-Agent Logs"])
-        with tab1:
-            st.markdown("### 📄 Extracted Document Structure")
-            st.info("🛡️ **PII Masked:** Personal identifiers (PAN, Aadhaar, Phone, Email, Bank A/C) are automatically redacted below for your privacy.")
-            masked_text = mask_pii(st.session_state.extracted_text)
-            st.markdown(masked_text)
-        with tab2:
-            st.info("Log visualization under development. Check terminal for real-time progress.")
+        # Final Footer or simplified log view can be added here if needed in the future
+        pass
 

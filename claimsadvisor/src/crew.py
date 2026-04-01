@@ -106,6 +106,7 @@ class ClaimsAuditor:
         return Task(
             config=self.tasks_config['claims_auditor'],
             agent=self.claims_auditor(),
+            context=[self.data_extraction(), self.task_researcher()],
             output_pydantic=FinalAuditReport # Force structured output
         )
 

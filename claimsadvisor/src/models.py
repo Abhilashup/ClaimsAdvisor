@@ -11,6 +11,8 @@ class ExtractedData(BaseModel):
     items: List[ExpenseItem] = Field(..., description="List of all extracted expense items")
 
 class AuditResult(BaseModel):
+    date: Optional[str] = Field(None, description="The date of the transaction if available")
+    vendor: Optional[str] = Field(None, description="The vendor or merchant name")
     description: str = Field(..., description="Description of the expense")
     amount: float = Field(..., description="Amount claimed")
     section: str = Field(..., description="Tax section (e.g., 80C, 80D, HRA)")

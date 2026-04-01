@@ -1,8 +1,16 @@
 claims_auditor:
   description: >
     CORE RULES:
-    1. For 'New Tax Regime', most typical claims (HRA, 80C, 80D, etc.) are NOT allowed for salaried individuals regardless of income.
-    2. For 'Old Tax Regime', calculate HRA exemption eligibility using the standard Indian formula (Lowest of: Actual HRA Received, Rent Paid minus 10% of Basic, or 50%/40% of Basic).
+    1. For 'New Tax Regime' (FY 2025-26):
+       - Most typical claims (HRA, 80C, 80D, etc.) are NOT allowed for salaried individuals.
+       - Meal Coupons / Food Vouchers are fully taxable as the exemption is not available.
+       - Standard Deduction is ₹75,000 (do not include it in the breakdown unless asked).
+    2. For 'Old Tax Regime' (FY 2025-26):
+       - HRA: Calculate eligibility based on: Lowest of (Actual HRA, Rent - 10% Basic, 50% Basic if Metro/40% if Non-Metro). Metro cities now include: Bengaluru, Mumbai, Delhi, Kolkata, Chennai, Pune, Hyderabad, Ahmedabad.
+       - 80C: Deductions like PPF, LIC, ELSS are valid up to a total of ₹1.5 Lakh.
+       - 80D: Medical insurance premiums are valid up to specific limits (25k/50k).
+       - Meal Coupons: Exempt up to ₹200 per meal (approx ₹4,400 per month).
+       - Standard Deduction is ₹50,000.
     3. If 'Monthly Basic Salary' or 'Monthly HRA Received' is 'Not Provided', you CANNOT precisely calculate HRA exemption. In such cases, for 'Old Tax Regime', mark HRA claims as 'Review Needed' and mention that income details are required for precise auditing.
     4. Auditing for all other categories (e.g., 80C, 80D, 80G, Standard Deduction, etc.) SHOULD PROCEED NORMALLY using standard tax limits for FY 2025-26, even if income details are 'Not Provided'.
     
@@ -16,10 +24,14 @@ claims_auditor:
     Review the extracted items strictly based on these CORE RULES and the provided USER PROFILE.
 
   expected_output: >
-    Assign 'Valid', 'Review Needed', or 'Rejected' based on Indian Tax Laws for the selected tax regime and income profile.
-    If 'New Tax Regime' is selected and a claim is entered that is not allowed (like HRA or 80C), mark it as 'Rejected'.
+    Assign 'Valid', 'Review Needed', or 'Rejected' based on Indian Tax Laws for the selected tax regime and income profile for FY 2025-26.
+    If 'New Tax Regime' is selected and a claim is entered that is not allowed (like HRA or 80C), mark it as 'Rejected' and explicitly state in reasoning: "HRA/80C is not allowed under the New Tax Regime."
     If 'Old Tax Regime' is selected, provide the maximum eligible HRA amount based on the provided basic salary and city.
-    Provide a detailed reasoning for each decision. 
+    For each audited claim, you MUST distinguish between the 'Description' and 'Section':
+    - **Description**: Detailed expense info (e.g., 'LIC Premium', 'HDFC Home Loan Interest', 'Apollo Pharmacy Bill').
+    - **Section**: Strictly the tax legal code (e.g., '80C', '80D', 'HRA', 'Section 24', '80G', '80TTA', 'LTA', 'Standard Deduction', 'Perquisite', 'Other').
+    - **Reasoning**: Provide a regime-specific reasoning for each decision. Do not use generic statements like "This is valid". Instead, specify based on regime-specific limits (e.g., "Allowed under Old Regime as per Section 10(13A) for HRA" or "Taxable in New Regime as most exemptions are disallowed").
+    - **Status**: Assign 'Valid', 'Review Needed', or 'Rejected' based on Indian Tax Laws for the selected tax regime and income profile for FY 2025-26.
     Return strictly a valid JSON object matching the defined schema.
     DO NOT include any conversational text, Markdown tags (like ```json), or references to coworkers.
     Stricly provide the audit report data in JSON format only.
@@ -30,7 +42,7 @@ data_extractor:
   description: >
     Extract every single monetary transaction, expense, or bill item mentioned in this text:
     \n\n{extracted_text}\n\n
-    For each item, identify the Description (Vendor/Service), Amount, Date, and Section (if mentioned).
+    For each item, identify the Description (Vendor/Service), Amount, and Date.
     \nCRITICAL: Do NOT extract any Personal Identifiable Information (PII) like names, PAN numbers, Aadhaar numbers, or Phone numbers. Mask them or skip them entirely.
     Make sure not to skip any numeric values that look like costs or fees.
 

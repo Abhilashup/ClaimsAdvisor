@@ -1,93 +1,82 @@
-# ⚖️ ClaimsAdvisor AI | Premium Tax Auditor
+# ClaimsAdvisor AI ⚖️
 
-**ClaimsAdvisor AI** is an advanced, AI-driven tax auditing platform designed specifically for salaried individuals in India. It leverages a multi-agent orchestration framework to parse, research, and audit tax claims with high precision, ensuring compliance with the latest Financial Year tax regulations.
+**A Premium AI-Powered Tax Auditor for Salaried Individuals**
+
+ClaimsAdvisor AI is a sophisticated multi-agent system designed to help employees audit their tax claims against the latest Indian Income Tax laws for **FY 2025-26 (AY 2026-27)**. It provides precise guidance on claim validity for both the **Old** and **New** Tax Regimes.
 
 ---
 
-## 🌟 Key Features
+## 🚀 Key Features
 
-- **🧠 Multi-Agent Orchestration**: Powered by **CrewAI**, the system employs specialized agents for information extraction, tax policy research, and final auditing.
-- **📄 High-Precision OCR**: Utilizes **LlamaParse** to convert complex financial documents (PDFs, Images, HTML) into structured Markdown while preserving tables and layouts.
-- **🛡️ Privacy-First Design**: Built-in logic to identify and mask Personal Identifiable Information (PII) like PAN, Aadhaar, and names before processing.
-- **🏛️ Indian Tax Expertise**: Supports both **Old and New Tax Regimes** and performs real-time research on current HRA, LTA, and Section 80C/80D policies.
-- **📊 Interactive Analytics**: Real-time dashboard featuring:
-  - **Audit Distribution Pie Charts**
-  - **Executive Summaries**
-  - **Detailed Status Tracking** (Valid, Rejected, or Review Needed)
-- **📥 Exportable Reports**: Download structured CSV audit reports for your records.
+-   **Multi-Agent Intelligence**: Powered by **CrewAI** with three specialized agents:
+    -   **Financial Data Extractor**: Converts raw documents into structured financial data.
+    -   **Tax Policy Researcher**: Verifies real-time tax limits and rules for FY 2025-26.
+    -   **Senior Tax Auditor**: Validates claims and provides detailed, regime-specific justifications.
+-   **Advanced Document Parsing**: Uses **LlamaParse** to accurately extract text and tables from PDFs, DOCX, Images, and HTML.
+-   **Regime-Specific Auditing**: Explicitly handles the differences between Old and New regimes, including:
+    -   HRA eligibility (with updated Metro city definitions like Bengaluru, Pune, etc.).
+    -   Section 80C and 80D limits.
+    -   Meal coupon exemptions (up to ₹200/meal).
+    -   Standard Deduction (₹75k for New, ₹50k for Old).
+-   **Privacy First**: Built-in **PII Masking** to automatically redact sensitive information like PAN, Aadhaar, Phone numbers, and Bank Accounts.
+-   **Executive Summary & Visuals**: Provides a high-level executive summary and an interactive distribution chart for quick insights.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Core Framework**: [CrewAI](https://www.crewai.com/) (Multi-Agent Workflows)
-- **Frontend**: [Streamlit](https://streamlit.io/)
-- **Document Parsing**: [LlamaParse](https://cloud.llamaindex.ai/)
-- **Large Language Model**: [Groq](https://groq.com/) (Llama-3.3-70b-versatile)
-- **Real-time Search**: [Serper.dev](https://serper.dev/) (Brave Search)
-- **Package Management**: [uv](https://github.com/astral-sh/uv)
+-   **Backend**: Python, CrewAI
+-   **Frontend**: Streamlit
+-   **LLM**: Llama-3.3-70b-versatile (via Groq)
+-   **OCR/Parsing**: LlamaParse
+-   **Search**: Serper (Brave Search)
+-   **Package Manager**: UV
 
 ---
 
-## 🚀 Getting Started
+## 🏗️ Installation & Setup
 
-### Prerequisites
+1.  **Clone the Repository**:
+    ```bash
+    git clone <your-repo-url>
+    cd claimsadvisor
+    ```
 
-- [Python 3.12+](https://www.python.org/)
-- [uv](https://github.com/astral-sh/uv) installed on your system.
-- API Keys for:
-  - **Groq** (LLM)
-  - **LlamaCloud** (OCR)
+2.  **Environment Setup**:
+    Ensure you have [uv](https://github.com/astral-sh/uv) installed. Create a `.env` file in `claimsadvisor/src` with the following keys:
+    ```env
+    GROQ_API_KEY=your_groq_key
+    LLAMA_CLOUD_API_KEY=your_llama_parse_key
+    SERPER_API_KEY=your_serper_search_key
+    ```
 
-### Installation
+3.  **Install Dependencies**:
+    ```bash
+    uv pip install -r pyproject.toml
+    ```
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-repo/ClaimsAdvisor.git
-   cd ClaimsAdvisor/claimsadvisor
-   ```
-
-2. **Configure Environment Variables**:
-   Create a `.env` file in the `claimsadvisor/src` directory (or use the one in root if configured) and add your keys:
-   ```env
-   GROQ_API_KEY=your_groq_key
-   LLAMA_CLOUD_API_KEY=your_llamaparse_key
-   ```
-
-3. **Run the Application**:
-   ```bash
-   uv run streamlit run app.py
-   ```
+4.  **Run the Application**:
+    ```bash
+    uv run streamlit run app.py
+    ```
 
 ---
 
-## 📁 Project Structure
+## 📋 Usage Guide
 
-```text
-claimsadvisor/
-├── app.py              # Main Streamlit Application
-├── src/
-│   ├── crew.py         # CrewAI Agent & Task Definitions
-│   ├── parser.py       # LlamaParse OCR Logic
-│   ├── models.py       # Pydantic Data Models
-│   └── config/         # YAML configurations for Agents & Tasks
-├── .env                # API Keys (Git ignored)
-└── pyproject.toml      # Dependency Management
-```
+1.  **Set Your Profile**: Select your Tax Regime (Old/New) and provide optional income details for precise HRA auditing.
+2.  **Upload Documents**: Drop your bills, rent receipts, or investment proofs.
+3.  **Start Audit**: Click 'Process' and watch the AI agents work in real-time.
+4.  **Review & Download**: Examine the detailed breakdown and download the final audit as a structured CSV.
 
 ---
 
-## 📝 Usage
+## 🔐 Privacy Note
 
-1. **Set Profile**: Input your Monthly Basic Salary and City Type in the sidebar to calibrate HRA eligibility logic.
-2. **Choose Regime**: Select between Old and New Tax Regimes.
-3. **Upload Documents**: Drop your tax receipts, bills, or investment proofs.
-4. **Audit**: The AI will extract data, verify it against FY 2025-26 rules, and provide a detailed verdict.
+This application is designed for **awareness only**. All Personal Identifiable Information (PII) is masked or ignored during processing. We do not store your documents permanently.
 
 ---
 
-## ⚠️ Disclaimer
+## 📜 Disclaimer
 
-*This tool provides basic tax awareness and preliminary audit guidance. It is not a substitute for professional tax advice or official tax filing services. Always consult with a certified tax professional before making final tax decisions.*
-
----
+This tool provides general guidance based on AI interpretation of tax laws. It does not constitute professional tax advice. Always consult a qualified Chartered Accountant before filing your tax returns.
