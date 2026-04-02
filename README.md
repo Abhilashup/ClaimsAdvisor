@@ -47,7 +47,6 @@ ClaimsAdvisor AI is a sophisticated multi-agent system designed to help employee
     ```env
     GROQ_API_KEY=your_groq_key
     LLAMA_CLOUD_API_KEY=your_llama_parse_key
-    SERPER_API_KEY=your_serper_search_key
     ```
 
 3.  **Install Dependencies**:
